@@ -7,6 +7,12 @@ resource "azurerm_storage_account" "main" {
   min_tls_version              = "TLS1_2"
   shared_access_key_enabled   = false
 
+  network_rules {
+    default_action = "Deny"
+    bypass          = ["AzureServices"]
+    ip_rules        = split(",", azurerm_linux_web_app.backend.outbound_ip_addresses)
+  }
+
   tags = merge(local.common_tags, {
     composant = "storage"
   })
