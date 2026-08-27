@@ -17,7 +17,7 @@ flowchart TD
     %% Groupe de ressources dédié
     subgraph "Groupe de ressources dédié - fbarryRG"
         Front[Frontend - Angular\nAccessible depuis Internet]
-        Back[Backend - Java Spring Boot\nIsolé de l'extérieur]
+        Back[Backend - Java Spring Boot\nExposé en HTTPS, protégé par CORS + clé API]
         subgraph "Ressources Data & Sécurité (accès réservé au backend)"
             DB[(PostgreSQL)]
             Redis[(Azure Managed Redis)]
