@@ -13,7 +13,7 @@ resource "azurerm_postgresql_flexible_server" "main" {
   administrator_password = random_password.postgres_admin.result
   storage_mb             = 32768
   sku_name               = "B_Standard_B1ms"
-  zone                    = "1"
+  zone                   = "1"
 
   tags = merge(local.common_tags, {
     composant = "postgresql"

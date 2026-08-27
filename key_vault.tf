@@ -7,9 +7,9 @@ resource "azurerm_key_vault" "main" {
   tenant_id           = data.azurerm_client_config.current.tenant_id
   sku_name            = "standard"
 
-    rbac_authorization_enabled  = true
-  purge_protection_enabled    = false
-  soft_delete_retention_days  = 7
+  rbac_authorization_enabled = true
+  purge_protection_enabled   = false
+  soft_delete_retention_days = 7
 
   tags = merge(local.common_tags, {
     composant = "key-vault"

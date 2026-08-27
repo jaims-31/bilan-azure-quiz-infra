@@ -8,22 +8,22 @@ terraform {
 
     }
 
-      random = {
-    source  = "hashicorp/random"
-    version = "~> 3.6"
-  }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.6"
+    }
   }
 
   backend "azurerm" {
     resource_group_name  = "fbarryRG"
     storage_account_name = "stfbarrytfstate"
-    container_name        = "tfstate"
-    key                   = "bilan-azure-quiz.tfstate"
+    container_name       = "tfstate"
+    key                  = "bilan-azure-quiz.tfstate"
   }
 }
 
 provider "azurerm" {
   features {}
-    storage_use_azuread = true
+  storage_use_azuread = true
 
 }
