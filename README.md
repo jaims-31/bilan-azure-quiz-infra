@@ -60,6 +60,11 @@ Deux contrôles compensent cette exposition :
 
 Le trafic est en outre systématiquement chiffré en HTTPS (`https_only = true` sur l'App Service backend, Static Web App HTTPS par défaut).
 
+Les ressources de données suivent la même logique de repli assumé et documenté :
+
+- **PostgreSQL et Storage Account** : protégés par un pare-feu IP restreint aux adresses de sortie du backend (`azurerm_linux_web_app.backend.outbound_ip_addresses`, dérivées dynamiquement plutôt que codées en dur — voir `firewall_rules.tf` et le bloc `network_rules` de `storage_account.tf`).
+- **Key Vault** : aucune restriction réseau, uniquement du contrôle d'accès par identité (RBAC — rôles `Key Vault Secrets User`/`Secrets Officer`). Ce n'est pas un oubli : Key Vault supporte bien un pare-feu IP (`network_acls`), mais l'activer casserait deux mécanismes essentiels du projet, tous deux exécutés depuis des runners GitHub Actions dont l'adresse IP change à chaque run et n'est pas prévisible à l'avance : l'écriture des secrets par le pipeline Terraform (dépôt infra), et la lecture de la clé API par le pipeline du frontend (résolution par tag, voir la section CI/CD ci-dessous). Restreindre le Key Vault par IP aurait cassé le critère de notation « CI/CD (récupération par tags) ». Le compromis retenu : un accès RBAC à privilège minimal plutôt qu'une isolation réseau incompatible avec l'architecture CI/CD choisie.
+
 
 ## Qualité IaC
 
