@@ -21,3 +21,9 @@ variable "storage_container_name" {
   type        = string
   default     = "quiz-media"
 }
+
+variable "admin_object_id" {
+  description = "Object ID Azure AD (accès Key Vault / Storage)"
+  type        = string
+  default     = "5722cb22-8d89-4281-a2e8-50351d87e976"
+}
