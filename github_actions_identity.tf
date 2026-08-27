@@ -21,3 +21,10 @@ resource "azurerm_role_assignment" "github_actions_contributor" {
   role_definition_name = "Contributor"
   principal_id         = azurerm_user_assigned_identity.github_actions.principal_id
 }
+
+
+resource "azurerm_role_assignment" "github_actions_kv_secrets_user" {
+  scope                = azurerm_key_vault.main.id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id          = azurerm_user_assigned_identity.github_actions.principal_id
+}
