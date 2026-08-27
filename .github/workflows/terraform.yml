@@ -9,37 +9,48 @@ on:
 permissions:
   id-token: write
   contents: read
-
-env:
-  ARM_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
-  ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
-  ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-  ARM_USE_OIDC: true
-
 jobs:
-  terraform:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+      - name: Set up Node
+        uses: actions/setup-node@v4
         with:
-          terraform_version: "1.15.8"
-
-      - name: Terraform Init
-        run: terraform init
-
-      - name: Terraform Format Check
-        run: terraform fmt -check
-
-      - name: Terraform Validate
-        run: terraform validate
-
-      - name: Terraform Plan
-        run: terraform plan -input=false
-
-      - name: Terraform Apply
+          node-version: '22'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint and format check
+        run: npm run check
+      - name: Test
+        run: npm run test:coverage
+      - name: Azure login (OIDC)
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -auto-approve -input=false
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - name: Resolve backend URL and API key by tag
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          BACKEND_HOSTNAME=$(az webapp list --resource-group fbarryRG --query "[?tags.composant=='backend'].defaultHostName" -o tsv)
+          KEY_VAULT_NAME=$(az keyvault list --resource-group fbarryRG --query "[?tags.composant=='key-vault'].name" -o tsv)
+          BACKEND_API_KEY=$(az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name backend-api-key --query value -o tsv)
+          echo "::add-mask::$BACKEND_API_KEY"
+          sed -i "s|https://REPLACE_WITH_PROD_API_URL/api|https://${BACKEND_HOSTNAME}/api|" src/environments/environment.ts
+          sed -i "s|__BACKEND_API_KEY__|${BACKEND_API_KEY}|" src/environments/environment.ts
+      - name: Build (production)
+        run: npm run build:prod
+      - name: Deploy to Azure Static Web Apps
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: upload
+          app_location: "dist/azure-quiz-frontend/browser"
+          output_location: ""
+          skip_app_build: true
