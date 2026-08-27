@@ -30,7 +30,7 @@ flowchart TD
     Front -->|Accès autorisé uniquement\nau frontend CORS + clé API| Back
 
     Back -->|Accès autorisé uniquement\nau backend par IP| DB
-    Back -->|Clé d'accès secrète + TLS\n(pas de pare-feu IP possible)| Redis
+        Back -->|"Clé d'accès secrète + TLS\n(pas de pare-feu IP possible)"| Redis
     Back -->|Accès autorisé uniquement\nau backend par IP| Storage
     Back -->|Accès autorisé uniquement\nau backend identité managée| KV
     %% Hébergement
