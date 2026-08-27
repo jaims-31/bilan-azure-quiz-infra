@@ -30,6 +30,8 @@ resource "azurerm_linux_web_app" "backend" {
     REDIS_SSL_ENABLED          = "true"
     STORAGE_ACCOUNT_NAME       = var.storage_account_name
     STORAGE_CONTAINER_NAME     = var.storage_container_name
+    BACKEND_API_KEY            = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.backend_api_key.versionless_id})"
+    APP_CORS_ALLOWED_ORIGINS   = "https://lively-sand-0b2c9ad03.7.azurestaticapps.net"
   }
 
 
@@ -38,3 +40,4 @@ resource "azurerm_linux_web_app" "backend" {
     composant = "backend"
   })
 }
+

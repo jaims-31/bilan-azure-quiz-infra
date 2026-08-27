@@ -13,3 +13,15 @@ resource "azurerm_key_vault_secret" "redis_primary_key" {
 
   depends_on = [azurerm_role_assignment.current_user_kv_secrets_officer]
 }
+
+resource "random_password" "backend_api_key" {
+  length  = 32
+  special = false
+}
+
+resource "azurerm_key_vault_secret" "backend_api_key" {
+  name         = "backend-api-key"
+  value        = random_password.backend_api_key.result
+  key_vault_id = azurerm_key_vault.main.id
+  depends_on   = [azurerm_role_assignment.current_user_kv_secrets_officer]
+}
