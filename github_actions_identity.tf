@@ -44,3 +44,11 @@ resource "azurerm_federated_identity_credential" "frontend_main_branch" {
   issuer                    = "https://token.actions.githubusercontent.com"
   subject                   = "repo:jaims-31@172600556/bilan-azure-quiz-frontend@1342030958:ref:refs/heads/main"
 }
+
+resource "azurerm_federated_identity_credential" "infra_pull_request" {
+  name                      = "github-infra-pull-request"
+  user_assigned_identity_id = azurerm_user_assigned_identity.github_actions.id
+  audience                  = ["api://AzureADTokenExchange"]
+  issuer                    = "https://token.actions.githubusercontent.com"
+  subject                   = "repo:jaims-31@172600556/bilan-azure-quiz-infra@1342028630:pull_request"
+}
