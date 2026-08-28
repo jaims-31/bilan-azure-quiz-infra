@@ -5,6 +5,8 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+    
+  workflow_dispatch:
 
 permissions:
   id-token: write
@@ -41,5 +43,5 @@ jobs:
         run: terraform plan -input=false
 
       - name: Terraform Apply
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: github.event_name == 'workflow_dispatch'
         run: terraform apply -auto-approve -input=false
