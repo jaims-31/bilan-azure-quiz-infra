@@ -37,5 +37,8 @@ jobs:
       - name: Terraform Init
         run: terraform init
 
-      - name: Terraform Destroy
-        run: terraform destroy -auto-approve -input=false
+      - name: Terraform Destroy (PostgreSQL and Redis only)
+        run: |
+          terraform destroy -auto-approve -input=false \
+            -target=azurerm_postgresql_flexible_server.main \
+            -target=azurerm_managed_redis.main
