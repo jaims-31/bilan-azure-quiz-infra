@@ -52,3 +52,26 @@ resource "azurerm_federated_identity_credential" "infra_pull_request" {
   issuer                    = "https://token.actions.githubusercontent.com"
   subject                   = "repo:jaims-31@172600556/bilan-azure-quiz-infra@1342028630:pull_request"
 }
+
+resource "azurerm_role_definition" "role_assignment_manager" {
+  name        = "role-assignment-manager-fbarry"
+  scope       = data.azurerm_resource_group.main.id
+  description = "Allows creating and deleting role assignments within fbarryRG only, so the GitHub Actions identity can manage role assignments (its own, and the backend Web App's) during automated destroy/recreate cycles."
+
+  permissions {
+    actions = [
+      "Microsoft.Authorization/roleAssignments/write",
+      "Microsoft.Authorization/roleAssignments/delete",
+    ]
+  }
+
+  assignable_scopes = [
+    data.azurerm_resource_group.main.id,
+  ]
+}
+
+resource "azurerm_role_assignment" "github_actions_role_assignment_manager" {
+  scope              = data.azurerm_resource_group.main.id
+  role_definition_id = azurerm_role_definition.role_assignment_manager.role_definition_resource_id
+  principal_id       = azurerm_user_assigned_identity.github_actions.principal_id
+}
