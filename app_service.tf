@@ -31,7 +31,7 @@ resource "azurerm_linux_web_app" "backend" {
     STORAGE_ACCOUNT_NAME       = var.storage_account_name
     STORAGE_CONTAINER_NAME     = var.storage_container_name
     BACKEND_API_KEY            = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.backend_api_key.versionless_id})"
-    APP_CORS_ALLOWED_ORIGINS   = "https://lively-sand-0b2c9ad03.7.azurestaticapps.net"
+    APP_CORS_ALLOWED_ORIGINS   = "https://${azurerm_static_web_app.frontend.default_host_name}"
   }
 
 
