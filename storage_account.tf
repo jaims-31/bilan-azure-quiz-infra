@@ -10,7 +10,7 @@ resource "azurerm_storage_account" "main" {
   network_rules {
     default_action = "Deny"
     bypass         = ["AzureServices"]
-    ip_rules       = split(",", azurerm_linux_web_app.backend.outbound_ip_addresses)
+    ip_rules       = compact(split(",", azurerm_linux_web_app.backend.outbound_ip_addresses))
   }
 
   tags = merge(local.common_tags, {
