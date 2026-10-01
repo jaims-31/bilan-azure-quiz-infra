@@ -1,0 +1,75 @@
+name: Runner VM - Terraform
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "runner-vm/**"
+      - ".github/workflows/runner-vm.yml"
+  push:
+    branches: [main]
+    paths:
+      - "runner-vm/**"
+      - ".github/workflows/runner-vm.yml"
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Action Terraform"
+        required: true
+        default: plan
+        type: choice
+        options:
+          - plan
+          - apply
+          - destroy
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: runner-vm-terraform
+  cancel-in-progress: false
+
+env:
+  ARM_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+  ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+  ARM_USE_OIDC: true
+  TF_VAR_allowed_ssh_ip: ${{ secrets.RUNNER_ALLOWED_SSH_IP }}
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: runner-vm
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.15.8"
+
+      - name: Terraform Init
+        run: terraform init -input=false
+
+      - name: Terraform Format Check
+        run: terraform fmt -check
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        if: github.event_name != 'workflow_dispatch' || inputs.action == 'plan' || inputs.action == 'apply'
+        run: terraform plan -input=false
+
+      - name: Terraform Apply
+        if: github.event_name == 'workflow_dispatch' && inputs.action == 'apply'
+        run: terraform apply -auto-approve -input=false
+
+      - name: Terraform Destroy
+        if: github.event_name == 'workflow_dispatch' && inputs.action == 'destroy'
+        run: terraform destroy -auto-approve -input=false
