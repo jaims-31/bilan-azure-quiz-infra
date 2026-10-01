@@ -19,7 +19,7 @@ variable "owner" {
 variable "vm_size" {
   description = "Taille de la VM (si Standard_B2s indisponible : Standard_D2s_v3)"
   type        = string
-  default     = "Standard_B2s"
+  default     = "Standard_D2s_v3"
 }
 
 variable "admin_username" {
